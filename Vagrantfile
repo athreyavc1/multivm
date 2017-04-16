@@ -1,7 +1,7 @@
 #$chef_server_url = "https://api.chef.io/organizations/test-lab-athreya"
 #$chef.validation_client_name = "test-lab-athreya-validator"
 #$chef.client_key_path = "/etc/chef/client.pem"
-#$chef.validation_key_path = "/home/learn/Downloads/validation.pem"
+$chef_validation_key_path = "~/.chef/validation.pem"
 $env_domain                  = 'homelab.com'
 
 guests = {
@@ -16,7 +16,7 @@ guests = {
    :singleton => true,
    :box => 'kensykora/windows_2012_r2_standard',
    :public_network => { :bridge => 'wlp3s0', :ip => '192.168.1.14', :netmask => '255.255.255.0', :gw => '192.168.1.254' },
-   :chef_recipes => ["chocolatey"]
+   :chef_recipes => ["chocolatey"],
    :vb_memory => 4096
    }
 }
@@ -53,8 +53,8 @@ Vagrant.configure("2") do |global_config|
  	 chef.node_name = "#{name}"
          if guest_is_windows
 		chef.provisioning_path = 'c:\\chef'
-    chef.client_key_path = 'c:\\chef\\client.pem'
-    chef.validation_key_path = 'validation.pem'
+    chef.client_key_path = 'c:\\chef-\\client.pem'
+    chef.validation_key_path = $chef_validation_key_path
          else
          	chef.provisioning_path = "/etc/chef"
          end
