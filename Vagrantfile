@@ -16,16 +16,18 @@ guests = {
    :singleton => true,
    :box => 'kensykora/windows_2012_r2_standard',
    :public_network => { :bridge => 'wlp3s0', :ip => '192.168.1.14', :netmask => '255.255.255.0', :gw => '192.168.1.254' },
-   :chef_recipes => ["chocolatey"],
+   :chef_recipes => ["chocolatey"]
    :vb_memory => 4096
    }
 }
 
 Vagrant.configure("2") do |global_config|
+
   guests.each_pair do | name, options |
     names = [name]
     names.each do |name|
      global_config.vm.define name do |config|
+       config.omnibus.chef_version = :latest
       guest_is_windows = options[:box].include? 'windows'
 	config.vm.hostname = "#{name}.homelab.com"
         config.vm.box = options[:box]
@@ -41,8 +43,7 @@ Vagrant.configure("2") do |global_config|
   	 config.vm.guest = :windows
   	 config.vm.network :forwarded_port, guest: 3389, host: 3389, id: "rdp", auto_correct: true
   	 config.vm.network :forwarded_port, guest: 5985, host: 5985, id: "winrm", auto_correct: true
-     config.vm.hostname = "#{name}"
-     config.vm.provision "shell", inline: "(Get-WmiObject Win32_ComputerSystem).Rename(#{name}.homelab.com)"
+         config.vm.hostname = "#{name}"
         else
          config.ssh.username = "vagrant"
          config.vm.hostname = "#{name}.homelab.com"
@@ -52,6 +53,8 @@ Vagrant.configure("2") do |global_config|
  	 chef.node_name = "#{name}"
          if guest_is_windows
 		chef.provisioning_path = 'c:\\chef'
+    chef.client_key_path = 'c:\\chef\\client.pem'
+    chef.validation_key_path = 'validation.pem'
          else
          	chef.provisioning_path = "/etc/chef"
          end
